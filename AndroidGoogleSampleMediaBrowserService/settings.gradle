@@ -1,0 +1,2 @@
+rootProject.name='AndroidGoogleSampleMediaBrowserService'
+include ':app'
