@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="needSelected" format="boolean"/>
+    <attr name="needApplyTextColor" format="boolean"/>
+    <attr name="needApplyDrawableColor" format="boolean"/>
+    <attr name="needApplyBackgroundColor" format="boolean"/>
+    <attr name="normalDrawableColor" format="reference|color"/>
+    <attr name="needApplyThemeColor" format="boolean"/>
+
+
+
+    <declare-styleable name="CMRoundedCorner">
+        <attr name="cmRoundedCorner" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="CustomThemeTextView">
+        <attr name="needSelected" />
+        <attr name="needApplyTextColor" />
+        <attr name="needApplyDrawableColor" />
+        <attr name="normalDrawableColor" />
+    </declare-styleable>
+
+    <declare-styleable name="CustomThemeIconImageView">
+        <attr name="needApplyThemeColor" />
+        <attr name="normalDrawableColor" />
+        <attr name="needSelected" />
+    </declare-styleable>
+
+
+    <declare-styleable name="DrawableCenterTextView">
+        <attr name="needRightHint" format="boolean"/>
+        <attr name="hintLeftMargin" format="dimension"/>
+        <attr name="hintTextSize" format="dimension"/>
+        <attr name="hintRadius" format="dimension"/>
+        <attr name="hintText" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="CustomThemeTabLayout">
+        <!--背景色是否随主题而改变-->
+        <attr name="type">
+            <enum name="normal" value="0"/>
+            <enum name="showInToolbar" value="1"/>
+            <enum name="showBelowToolbar" value="2"/>
+        </attr>
+    </declare-styleable>
+</resources>
