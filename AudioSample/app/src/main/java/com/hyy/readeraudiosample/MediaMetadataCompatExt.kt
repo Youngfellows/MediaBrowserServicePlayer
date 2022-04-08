@@ -270,11 +270,11 @@ fun List<MediaMetadataCompat>.toMediaSource(
 fun MediaMetadataCompat.toMediaQueueItem(): MediaQueueItem {
     val metadata: MediaMetadata = toCastMediaMetadata()
     val mediaInfo = MediaInfo.Builder(this.mediaUri.toString())
-            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-            .setContentType(MimeTypes.AUDIO_MPEG)
-            .setStreamDuration(this.duration)
-            .setMetadata(metadata)
-            .build()
+        .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+        .setContentType(MimeTypes.AUDIO_MPEG)
+        .setStreamDuration(this.duration)
+        .setMetadata(metadata)
+        .build()
     return MediaQueueItem.Builder(mediaInfo).build()
 }
 

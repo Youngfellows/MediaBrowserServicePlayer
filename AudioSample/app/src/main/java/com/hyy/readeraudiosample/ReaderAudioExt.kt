@@ -7,10 +7,6 @@ import com.hyy.readeraudiosample.model.ChapterAudioItem
 import java.util.concurrent.TimeUnit
 
 /**
- *Create by hyy on 2020/12/14
- */
-
-/**
  * Extension method for [MediaMetadataCompat.Builder] to set the fields from
  * our JSON constructed object (to make the code a bit easier to see).
  */

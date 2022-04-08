@@ -27,7 +27,7 @@ import com.hyy.readeraudiosample.model.ChapterAudioItem
 import java.util.*
 
 /**
- *Create by hyy on 2020/12/14
+ * 媒体浏览器服务
  */
 const val MY_MEDIA_ROOT_ID = "media_root_id"
 private const val MY_EMPTY_MEDIA_ROOT_ID = "empty_root_id"
@@ -40,30 +40,64 @@ const val MEDIA_DESCRIPTION_EXTRAS_START_PLAYBACK_POSITION_MS = "playback_start_
 const val ACTION_PLAYBACK_SPEED = "action_playback_speed"
 const val ACTION_ADD_MEDIA_ITEM = "action_add_media_item"
 const val PLAYBACK_SPEED = "playback_speed"
+
 class ReaderAudioService : MediaBrowserServiceCompat() {
 
     companion object {
         const val TAG = "ReaderAudioService"
     }
 
-    private var lastWindowIndex: Int = -1//上一次播放章节所在播放列表中的位置
+    /**
+     * 上一次播放章节所在播放列表中的位置
+     */
+    private var lastWindowIndex: Int = -1
+
+    /**
+     * 当前播放数据
+     */
     private var currentPlaylistItems: MutableList<MediaMetadataCompat> = mutableListOf()
+
 
     // The current player will either be an ExoPlayer (for local playback) or a CastPlayer (for
     // remote playback through a Cast device).
+    /**
+     * ExoPlayer播放器
+     */
     private lateinit var currentPlayer: Player
+
+    /**
+     * 通知管理
+     */
     private lateinit var notificationManager: UampNotificationManager
 
+    /**
+     * 与客户端交换的MediaSession
+     */
     private lateinit var mediaSession: MediaSessionCompat
+
+    /**
+     * 播放状态
+     */
     private lateinit var stateBuilder: PlaybackStateCompat.Builder
+
+    /**
+     * 与客户端交换的MediaSessionConnector
+     */
     private lateinit var mediaSessionConnector: MediaSessionConnector
 
+    /**
+     * 是否开启后台服务
+     */
     private var isForegroundService = false
+
     private val uAmpAudioAttributes = AudioAttributes.Builder()
         .setContentType(C.CONTENT_TYPE_MUSIC)
         .setUsage(C.USAGE_MEDIA)
         .build()
 
+    /**
+     * 播放器监听
+     */
     private val playerListener = PlayerEventListener()
 
     private val mediaSource = ConcatenatingMediaSource()
@@ -88,29 +122,15 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
         )
     }
 
-    val novelModel by lazy {
-        ChapterAudioItem(
-            "Chapter One",
-            "Test",
-            "http://tts.sg.ufileos.com/audio/dev/33/54733/11670333/1/1607933874.mp3",
-            "1001",
-            429,
-            "https://storage.googleapis.com/uamp/The_Kyoto_Connection_-_Wake_Up/art.jpg"
-        )
+    private val novelModel by lazy {
+        TestDataFactory.novelModel()
     }
 
-    val novelModel2 by lazy {
-        ChapterAudioItem(
-            "Chapter One",
-            "Test",
-            "https://storage.googleapis.com/automotive-media/Tell_The_Angels.mp3",
-            "1001",
-            429,
-            "https://storage.googleapis.com/uamp/The_Kyoto_Connection_-_Wake_Up/art.jpg"
-        )
+    private val novelModel2 by lazy {
+        TestDataFactory.novelMode2()
     }
 
-    val mediaMetadataCompat by lazy {
+    private val mediaMetadataCompat by lazy {
         MediaMetadataCompat.Builder()
             .from(novelModel)
             .apply {
@@ -123,7 +143,7 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
             }
     }
 
-    val mediaMetadataCompat2 by lazy {
+    private val mediaMetadataCompat2 by lazy {
         MediaMetadataCompat.Builder()
             .from(novelModel2)
             .apply {
@@ -135,8 +155,6 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
                 description.extras?.putAll(bundle)
             }
     }
-
-//    val
 
 
     /**
@@ -168,7 +186,7 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
         }
     }
 
-    val mySessionCallback = object  : MediaSessionCompat.Callback() {
+    private val mySessionCallback = object : MediaSessionCompat.Callback() {
         override fun onPlay() {
             super.onPlay()
             Log.d(TAG, "onPlay: ")
@@ -242,7 +260,7 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
         // ExoPlayer will manage the MediaSession for us.
         mediaSessionConnector = MediaSessionConnector(mediaSession)
         mediaSessionConnector.setRewindIncrementMs(15000)
-//        mediaSessionConnector.invalidateMediaSessionPlaybackState()
+        //mediaSessionConnector.invalidateMediaSessionPlaybackState()
         mediaSessionConnector.setPlaybackPreparer(UampPlaybackPreparer())
         //将元数据注入到UI层
         mediaSessionConnector.setQueueNavigator(UampQueueNavigator(mediaSession))
@@ -365,7 +383,7 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
                 lastWindowIndex = latestWindowIndex
                 // ...
             }
-            if (latestWindowIndex == (currentPlaylistItems.size-1)) {
+            if (latestWindowIndex == (currentPlaylistItems.size - 1)) {
                 Log.d(TAG, "onPositionDiscontinuity: preloadNextMediaItem")
                 preloadNextMediaItem(latestWindowIndex)
             }
@@ -374,6 +392,7 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
             Log.d(TAG, "onPositionDiscontinuity: latestWindowIndex --->$latestWindowIndex")
 
         }
+
         override fun onPlayerError(error: ExoPlaybackException) {
             var message = R.string.generic_error;
             when (error.type) {
@@ -410,7 +429,7 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
     }
 
     private fun preloadNextMediaItem(latestWindowIndex: Int) {
-        when(latestWindowIndex) {
+        when (latestWindowIndex) {
             0 -> {
                 prepareNextMediaItem(TestDataFactory.mediaItem2())
             }
@@ -564,6 +583,12 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
             Log.d(TAG, "onPrepare: ")
         }
 
+        /**
+         * 客户端设置播放资源的回调
+         * @param mediaId
+         * @param playWhenReady
+         * @param extras
+         */
         override fun onPrepareFromMediaId(
             mediaId: String,
             playWhenReady: Boolean,
@@ -582,7 +607,7 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
                     if (item != null) {
                         exoPlayer.playWhenReady = true
                         exoPlayer.prepare(mediaSource)
-                    }else {
+                    } else {
                         currentPlaylistItems.add(metadata)
                         preparePlaylist(
                             metadataList = currentPlaylistItems,
@@ -648,6 +673,11 @@ class ReaderAudioService : MediaBrowserServiceCompat() {
         return metadataList
     }
 
+    /**
+     * 获取播放数据
+     * @param audioItem 播放数据
+     * @return
+     */
     private fun createMetaDataFromAudioItem(audioItem: ChapterAudioItem): MediaMetadataCompat {
         val metaData = MediaMetadataCompat.Builder()
             .from(audioItem)

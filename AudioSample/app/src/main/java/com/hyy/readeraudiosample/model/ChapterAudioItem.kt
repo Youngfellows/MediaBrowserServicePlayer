@@ -4,7 +4,13 @@ import android.os.Parcel
 import android.os.Parcelable
 
 /**
- *Create by hyy on 2020/12/14
+ * 文章音频数据实体
+ * @property chapterName
+ * @property bookName
+ * @property source
+ * @property id
+ * @property duration
+ * @property img
  */
 data class ChapterAudioItem(
     val chapterName: String,
@@ -13,7 +19,7 @@ data class ChapterAudioItem(
     val id: String,
     val duration: Long,
     val img: String
-): Parcelable {
+) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
         parcel.readString() ?: "",

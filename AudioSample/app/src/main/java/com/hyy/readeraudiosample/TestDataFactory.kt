@@ -3,7 +3,7 @@ package com.hyy.readeraudiosample
 import com.hyy.readeraudiosample.model.ChapterAudioItem
 
 /**
- *Create by hyy on 2020/12/16
+ * 测试数据工厂
  */
 object TestDataFactory {
 
@@ -61,4 +61,21 @@ object TestDataFactory {
         "https://storage.googleapis.com/automotive-media/album_art_2.jpg"
     )
 
+    fun novelModel(): ChapterAudioItem =  ChapterAudioItem(
+        "Chapter One",
+        "Test",
+        "http://tts.sg.ufileos.com/audio/dev/33/54733/11670333/1/1607933874.mp3",
+        "1001",
+        429,
+        "https://storage.googleapis.com/uamp/The_Kyoto_Connection_-_Wake_Up/art.jpg"
+    )
+
+    fun novelMode2(): ChapterAudioItem =   ChapterAudioItem(
+        "Chapter One",
+        "Test",
+        "https://storage.googleapis.com/automotive-media/Tell_The_Angels.mp3",
+        "1001",
+        429,
+        "https://storage.googleapis.com/uamp/The_Kyoto_Connection_-_Wake_Up/art.jpg"
+    )
 }

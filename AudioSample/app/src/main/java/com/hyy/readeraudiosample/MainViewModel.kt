@@ -1,7 +1,6 @@
 package com.hyy.readeraudiosample
 
 import android.app.Application
-import android.media.session.PlaybackState
 import android.os.Handler
 import android.os.Looper
 import android.support.v4.media.MediaBrowserCompat
@@ -14,20 +13,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.android.uamp.media.extensions.currentPlayBackPosition
-import com.example.android.uamp.media.extensions.isPlayEnabled
-import com.example.android.uamp.media.extensions.isPlaying
-import com.example.android.uamp.media.extensions.isPrepared
 import com.hyy.readeraudiosample.model.ChapterAudioItem
 import com.hyy.readeraudiosample.model.NowPlayingMetadata
 
 /**
- *Create by hyy on 2020/12/14
+ * 携带被观察数据的ViewModel
+ *
+ * @property app
+ * @property musicServiceConnection
  */
 class MainViewModel(
     private val app: Application,
     private val musicServiceConnection: MusicServiceConnection
-) : ViewModel(){
+) : ViewModel() {
 
     companion object {
         const val TAG = "MainViewModel"
@@ -35,29 +33,53 @@ class MainViewModel(
     }
 
     private var preloadDone: Boolean = false
+
+    /**
+     * 是否更新位置
+     */
     private var updatePosition: Boolean = true
 
-    //默认播放状态
+    /**
+     * 默认播放状态
+     */
     private var playbackState: PlaybackStateCompat = EMPTY_PLAYBACK_STATE
-    //当前播放位置
+
+    /**
+     * 当前播放位置
+     */
     val playbackPosition = MutableLiveData<Long>().apply {
         postValue(0L)
     }
-    //当前播放元数据
+
+    /**
+     * 当前播放元数据
+     */
     val mediaMetadata = MutableLiveData<NowPlayingMetadata>()
+
+    /**
+     * 播放暂停按钮图片
+     */
     val mediaButtonRes = MutableLiveData<Int>().apply {
         postValue(R.drawable.ic_player_start)
     }
 
+    /**
+     * 主线程Handler
+     */
     private val handler = Handler(Looper.getMainLooper())
+
+    /**
+     * 服务端订阅回调
+     */
     private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
+
         override fun onChildrenLoaded(
             parentId: String,
             children: List<MediaBrowserCompat.MediaItem>
         ) {
             Log.d(TAG, "onChildrenLoaded: ")
             //TODO 根据service端的mediaItem来设置UI
-            children.forEach { child->
+            children.forEach { child ->
                 Log.d(TAG, "onChildrenLoaded: mediaId--> ${child.mediaId}")
                 Log.d(TAG, "onChildrenLoaded: description.title--> ${child.description.title}")
                 Log.d(TAG, "onChildrenLoaded: description.mediaId--> ${child.description.mediaId}")
@@ -115,9 +137,14 @@ class MainViewModel(
         if (playbackPosition.value != currPosition)
             playbackPosition.postValue(currPosition)
         if (updatePosition)
-            checkPlaybackPosition()
+            checkPlaybackPosition()//轮询更新位置
     }, POSITION_UPDATE_INTERVAL_MILLIS)
 
+    /**
+     *
+     * @param playbackState 播放状态
+     * @param mediaMetadata 播放数据
+     */
     private fun updateState(
         playbackState: PlaybackStateCompat,
         mediaMetadata: MediaMetadataCompat
@@ -149,7 +176,7 @@ class MainViewModel(
             if (preloadDone.not()) {
                 Toast.makeText(app, "开始预加载下个内容", Toast.LENGTH_LONG).show()
 //                addMediaItem()
-                preloadDone =true
+                preloadDone = true
             }
         }
 
@@ -174,6 +201,9 @@ class MainViewModel(
         updatePosition = false
     }
 
+    /**
+     * 播放
+     */
     fun playMediaId() {
         val nowPlaying = musicServiceConnection.nowPlaying.value
         val transportControls = musicServiceConnection.transportControls
@@ -186,9 +216,9 @@ class MainViewModel(
         if (isPrepared) {
             musicServiceConnection.playbackState.value?.let { playbackState ->
                 when {
-                    playbackState.isPlaying -> transportControls.pause()
+                    playbackState.isPlaying -> transportControls.pause()//暂停
                     playbackState.isPlayEnabled -> {
-                        transportControls.play()
+                        transportControls.play()//播放
                     }
                     else -> {
                         Log.w(
@@ -199,30 +229,51 @@ class MainViewModel(
                 }
             }
         } else {
+            //指定播放数据并播放
             val bundle = bundleOf()
             bundle.putParcelable(ACTION_ADD_MEDIA_ITEM, TestDataFactory.mediaItem1())
             transportControls.playFromMediaId(TestDataFactory.mediaItem1().id, bundle)
         }
     }
 
+    /**
+     * 快进
+     */
     fun fastForward() {
         musicServiceConnection.transportControls.fastForward()
     }
 
+    /**
+     * 快退
+     */
     fun fastRewind() {
         musicServiceConnection.transportControls.rewind()
     }
 
+    /**
+     * 快进
+     */
     fun seekToPosition(pos: Int) {
-        musicServiceConnection.transportControls.seekTo(pos*1000L)
+        musicServiceConnection.transportControls.seekTo(pos * 1000L)
     }
 
+    /**
+     * 改变播放速度
+     * @param rate 播放速度
+     */
     fun changePlaybackRate(rate: Float) {
         Log.d(TAG, "changePlaybackRate: rate-->$rate")
 //        musicServiceConnection.transportControls.setPlaybackSpeed(rate)
-        musicServiceConnection.setCustomAction(ACTION_PLAYBACK_SPEED, bundleOf(PLAYBACK_SPEED to rate))
+        musicServiceConnection.setCustomAction(
+            ACTION_PLAYBACK_SPEED,
+            bundleOf(PLAYBACK_SPEED to rate)
+        )
     }
 
+    /**
+     * 加载播放列表
+     * @return
+     */
     fun addMediaItem() {
         //可以通过这里预加载下个章节的音频文件 通过过bundle 吧
         val bundle = bundleOf()
@@ -232,21 +283,42 @@ class MainViewModel(
         //musicServiceConnection.transportControls.
     }
 
-    fun createTestChapterAudioItem1() : ArrayList<ChapterAudioItem>{
-        return arrayListOf(TestDataFactory.mediaItem1(), TestDataFactory.mediaItem2(), TestDataFactory.mediaItem3())
+    /**
+     * 加载播放列表
+     * @return
+     */
+    fun createTestChapterAudioItem1(): ArrayList<ChapterAudioItem> {
+        return arrayListOf(
+            TestDataFactory.mediaItem1(),
+            TestDataFactory.mediaItem2(),
+            TestDataFactory.mediaItem3()
+        )
     }
 
-    fun createTestChapterAudioItem2() : ArrayList<ChapterAudioItem>{
-        return arrayListOf(TestDataFactory.mediaItem4(), TestDataFactory.mediaItem5(), TestDataFactory.mediaItem6())
+    /**
+     * 加载播放列表
+     * @return
+     */
+    fun createTestChapterAudioItem2(): ArrayList<ChapterAudioItem> {
+        return arrayListOf(
+            TestDataFactory.mediaItem4(),
+            TestDataFactory.mediaItem5(),
+            TestDataFactory.mediaItem6()
+        )
     }
 
+    /**
+     * 为ViewModel传递参数的工厂
+     * @property app
+     * @property musicServiceConnection
+     */
     internal class Factory(
         private val app: Application,
         private val musicServiceConnection: MusicServiceConnection
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-              return MainViewModel(app, musicServiceConnection) as T
+                return MainViewModel(app, musicServiceConnection) as T
             }
             throw IllegalStateException("not a valid class")
         }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.uamp.media.extensions
+package com.hyy.readeraudiosample
 
 import android.os.SystemClock
 import android.support.v4.media.MediaMetadataCompat
@@ -22,36 +22,62 @@ import android.support.v4.media.session.PlaybackStateCompat
 
 /**
  * Useful extension methods for [PlaybackStateCompat].
+ * 播放状态扩展
+ */
+
+/**
+ * 是否已准备好缓冲资源
  */
 inline val PlaybackStateCompat.isPrepared
     get() = (state == PlaybackStateCompat.STATE_BUFFERING) ||
             (state == PlaybackStateCompat.STATE_PLAYING) ||
             (state == PlaybackStateCompat.STATE_PAUSED)
 
+/**
+ * 是否在播放
+ */
 inline val PlaybackStateCompat.isPlaying
     get() = (state == PlaybackStateCompat.STATE_BUFFERING) ||
             (state == PlaybackStateCompat.STATE_PLAYING)
 
+/**
+ * 是否能播放
+ */
 inline val PlaybackStateCompat.isPlayEnabled
     get() = (actions and PlaybackStateCompat.ACTION_PLAY != 0L) ||
             ((actions and PlaybackStateCompat.ACTION_PLAY_PAUSE != 0L) &&
                     (state == PlaybackStateCompat.STATE_PAUSED))
 
+/**
+ * 是否能暂停
+ */
 inline val PlaybackStateCompat.isPauseEnabled
     get() = (actions and PlaybackStateCompat.ACTION_PAUSE != 0L) ||
             ((actions and PlaybackStateCompat.ACTION_PLAY_PAUSE != 0L) &&
                     (state == PlaybackStateCompat.STATE_BUFFERING ||
                             state == PlaybackStateCompat.STATE_PLAYING))
 
+/**
+ * 是否停止
+ */
 inline val PlaybackStateCompat.isEnded
     get() = (actions and PlaybackStateCompat.ACTION_STOP != 0L)
 
+/**
+ * 是否下一首
+ */
 inline val PlaybackStateCompat.isSkipToNextEnabled
     get() = actions and PlaybackStateCompat.ACTION_SKIP_TO_NEXT != 0L
 
+/**
+ * 是否上一首
+ */
 inline val PlaybackStateCompat.isSkipToPreviousEnabled
     get() = actions and PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS != 0L
 
+/**
+ * 返回播放状态
+ */
 inline val PlaybackStateCompat.stateName
     get() = when (state) {
         PlaybackStateCompat.STATE_NONE -> "STATE_NONE"
@@ -68,6 +94,7 @@ inline val PlaybackStateCompat.stateName
 /**
  * Calculates the current playback position based on last update time along with playback
  * state and speed.
+ * 根据上次更新时间以及播放状态和速度,计算当前播放位置
  */
 inline val PlaybackStateCompat.currentPlayBackPosition: Long
     get() = if (state == PlaybackStateCompat.STATE_PLAYING) {

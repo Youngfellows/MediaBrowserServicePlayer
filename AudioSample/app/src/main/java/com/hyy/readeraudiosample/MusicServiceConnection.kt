@@ -50,28 +50,47 @@ import androidx.media.MediaBrowserServiceCompat
  *  [MediaBrowserConnectionCallback] and [MediaBrowserCompat] objects.
  */
 class MusicServiceConnection(context: Context, serviceComponent: ComponentName) {
-    //是否链接上服务了
+
+    /**
+     * 是否链接上服务了
+     */
     val isConnected = MutableLiveData<Boolean>()
         .apply { postValue(false) }
-    //网络是否失败了
+
+    /**
+     * 网络是否失败了
+     */
     val networkFailure = MutableLiveData<Boolean>()
         .apply { postValue(false) }
 
-
     val rootMediaId: String get() = mediaBrowser.root
 
-    //播放状态回调
+    /**
+     * 播放状态回调
+     */
     val playbackState = MutableLiveData<PlaybackStateCompat>()
         .apply { postValue(EMPTY_PLAYBACK_STATE) }
+
+    /**
+     * 播放数据回调
+     */
     val nowPlaying = MutableLiveData<MediaMetadataCompat>()
         .apply { postValue(NOTHING_PLAYING) }
 
+    /**
+     * UI控制器
+     */
     val transportControls: MediaControllerCompat.TransportControls
         get() = mediaController.transportControls
 
-    //链接回调
+    /**
+     * 媒体浏览器服务链接回调
+     */
     private val mediaBrowserConnectionCallback = MediaBrowserConnectionCallback(context)
-    //连接服务（MusicService）类
+
+    /**
+     * 连接服务（MusicService）类
+     */
     private val mediaBrowser = MediaBrowserCompat(
         context,
         serviceComponent,
@@ -84,6 +103,9 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
         mediaBrowser.sendCustomAction(action, bundle, null)
     }
 
+    /**
+     * 媒体UI控制器
+     */
     private lateinit var mediaController: MediaControllerCompat
 
     fun subscribe(parentId: String, callback: MediaBrowserCompat.SubscriptionCallback) {
@@ -113,8 +135,13 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
         false
     }
 
+    /**
+     * 媒体浏览器服务链接回调
+     * @property context 上下文
+     */
     private inner class MediaBrowserConnectionCallback(private val context: Context) :
         MediaBrowserCompat.ConnectionCallback() {
+
         /**
          * Invoked after [MediaBrowserCompat.connect] when the request has successfully
          * completed.
@@ -147,8 +174,15 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
         }
     }
 
+    /**
+     * 播放UI控制器回调
+     */
     private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
 
+        /**
+         * 播放状态改变
+         * @param state 播放器状态
+         */
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             Log.d(TAG, "onPlaybackStateChanged: $state")
             state?.run {
@@ -158,6 +192,10 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
             playbackState.postValue(state ?: EMPTY_PLAYBACK_STATE)
         }
 
+        /**
+         * 播放数据改变
+         * @param metadata 播放数据
+         */
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             // When ExoPlayer stops we will receive a callback with "empty" metadata. This is a
             // metadata object which has been instantiated with default values. The default value
@@ -181,6 +219,7 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
         }
 
         override fun onQueueChanged(queue: MutableList<MediaSessionCompat.QueueItem>?) {
+
         }
 
         override fun onSessionEvent(event: String?, extras: Bundle?) {
@@ -192,6 +231,7 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
         }
 
         /**
+         * 链接断开
          * Normally if a [MediaBrowserServiceCompat] drops its connection the callback comes via
          * [MediaControllerCompat.Callback] (here). But since other connection status events
          * are sent to [MediaBrowserCompat.ConnectionCallback], we catch the disconnect here and
@@ -203,8 +243,12 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
         }
     }
 
+    /**
+     * 静态方法,单例
+     */
     companion object {
         const val TAG = "MusicServiceConnection"
+
         // For Singleton instantiation.
         @Volatile
         private var instance: MusicServiceConnection? = null
@@ -218,11 +262,17 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
     }
 }
 
+/**
+ * 空闲状态
+ */
 @Suppress("PropertyName")
 val EMPTY_PLAYBACK_STATE: PlaybackStateCompat = PlaybackStateCompat.Builder()
     .setState(PlaybackStateCompat.STATE_NONE, 0, 0f)
     .build()
 
+/**
+ * 没有播放数据
+ */
 @Suppress("PropertyName")
 val NOTHING_PLAYING: MediaMetadataCompat = MediaMetadataCompat.Builder()
     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, "")
