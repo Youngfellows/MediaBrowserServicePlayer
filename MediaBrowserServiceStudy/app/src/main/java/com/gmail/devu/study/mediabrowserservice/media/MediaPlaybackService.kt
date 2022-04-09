@@ -16,19 +16,29 @@ import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 
+/**
+ * 媒体浏览器服务
+ */
 class MediaPlaybackService : MediaBrowserServiceCompat() {
-    private val TAG = this::class.java.simpleName
-
-    private val BROWSABLE_ROOT = "/"
-
-    private lateinit var mediaSession: MediaSessionCompat
-    private lateinit var mediaController: MediaControllerCompat
 
     /**
-     * ExoPlayer
+     * 常量
      */
+    companion object {
+        private val TAG = MediaPlaybackService::class.java.simpleName
+        private const val BROWSABLE_ROOT = "_ROOT_"
+    }
+
+    private lateinit var mediaSession: MediaSessionCompat
+
+    private lateinit var mediaController: MediaControllerCompat
+
+
     private lateinit var mediaSessionConnector: MediaSessionConnector
 
+    /**
+     * ExoPlayer 播放器
+     */
     private val exoPlayer: ExoPlayer by lazy {
         SimpleExoPlayer.Builder(this).build().apply {
             val attributes = AudioAttributes.Builder()
@@ -43,21 +53,22 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         super.onCreate()
         Log.v(TAG, "onCreate()")
 
-        // Create and initialize the media session
-        mediaSession = MediaSessionCompat(this, this.TAG).apply {
+        //1.创建会话 Create and initialize the media session
+        mediaSession = MediaSessionCompat(this, TAG).apply {
             isActive = true
         }
 
-        // Set the media session token to MediaBrowserServiceCompat
+        //2. 设置令牌 Set the media session token to MediaBrowserServiceCompat
         sessionToken = mediaSession.sessionToken
 
-        // Using MediaControllerCompat only to output the status change status to the log.
+        //3. 创建媒体控制器 Using MediaControllerCompat only to output the status change status to the log.
         mediaController = MediaControllerCompat(this, mediaSession).apply {
             registerCallback(MediaControllerCallback())
         }
 
-        // Connect the media session and ExoPlayer
+        //4. 关联播放器 Connect the media session and ExoPlayer
         mediaSessionConnector = MediaSessionConnector(mediaSession).also { connector ->
+
             val dataSourceFactory = DefaultDataSourceFactory(
                 this,
                 Util.getUserAgent(this, "devu.study"),
@@ -67,14 +78,15 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 exoPlayer,
                 dataSourceFactory
             )
-            connector.setPlayer(exoPlayer)
-            connector.setPlaybackPreparer(playbackPreparer)
+            connector.setPlayer(exoPlayer)//设置播放器
+            connector.setPlaybackPreparer(playbackPreparer)//设置播放状态回调
             connector.setQueueNavigator(MyQueueNavigator(mediaSession))
         }
     }
 
     /**
      * Called to get the root information for browsing by a particular client.
+     * 客户端连接触发
      */
     override fun onGetRoot(
         clientPackageName: String,
@@ -87,6 +99,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     /**
      * Called to get information about the children of a media item.
+     * 加载服务端播放列表数据
      */
     override fun onLoadChildren(
         parentId: String,
@@ -94,8 +107,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     ) {
         Log.v(TAG, "onLoadChildren(%s)".format(parentId))
         if (parentId == BROWSABLE_ROOT) {
+            //播放列表数据
             // This sample only supports root browsing
-            val children = DummyMedia.ITEMS.map { item ->
+            val children: List<MediaBrowserCompat.MediaItem> = DummyMedia.ITEMS.map { item ->
                 MediaBrowserCompat.MediaItem(
                     item.description,
                     MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
@@ -123,8 +137,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     /**
      * For study the behavior, Just output the status change to log
+     * 接收客户端发送的媒体控制指令
      */
     private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
+
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             Log.v(TAG, "onMetadataChanged(%s)".format(metadata?.description))
         }

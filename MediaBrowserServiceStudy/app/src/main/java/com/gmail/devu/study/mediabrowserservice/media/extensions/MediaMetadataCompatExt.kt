@@ -62,6 +62,7 @@ inline val MediaMetadataCompat.fullDescription
  * Extension method for building an [ExtractorMediaSource] from a [MediaMetadataCompat] object.
  *
  * For convenience, place the [MediaDescriptionCompat] into the tag so it can be retrieved later.
+ * 为播放器设置播放数据
  */
 fun MediaMetadataCompat.toMediaSource(dataSourceFactory: DataSource.Factory) =
     ProgressiveMediaSource.Factory(dataSourceFactory)
@@ -77,8 +78,12 @@ fun List<MediaMetadataCompat>.toMediaSource(
 ): ConcatenatingMediaSource {
 
     val concatenatingMediaSource = ConcatenatingMediaSource()
+
+    //遍历列表
     forEach {
+        //为播放器设置播放数据
         concatenatingMediaSource.addMediaSource(it.toMediaSource(dataSourceFactory))
     }
+
     return concatenatingMediaSource
 }

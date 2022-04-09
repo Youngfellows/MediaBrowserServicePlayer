@@ -11,6 +11,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // The volume controls should adjust the music volume while in the app.
+        //设置音频播放类型-音乐
         volumeControlStream = AudioManager.STREAM_MUSIC
     }
 }

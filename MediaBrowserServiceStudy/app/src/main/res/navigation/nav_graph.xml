@@ -5,18 +5,25 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/mediaItemFragment">
 
+    <!--媒体列表页-->
     <fragment
         android:id="@+id/mediaItemFragment"
         android:name="com.gmail.devu.study.mediabrowserservice.ui.MediaItemFragment"
         android:label="fragment_media_item"
-        tools:layout="@layout/fragment_media_item" >
+        tools:layout="@layout/fragment_media_item">
+
+        <!--跳转到媒体列表页-->
         <action
             android:id="@+id/action_mediaItemFragment_self"
             app:destination="@id/mediaItemFragment" />
+
+        <!--跳转到播放页-->
         <action
             android:id="@+id/action_mediaItemFragment_to_mediaPlaybackFragment"
             app:destination="@id/mediaPlaybackFragment" />
     </fragment>
+
+    <!--播放页-->
     <fragment
         android:id="@+id/mediaPlaybackFragment"
         android:name="com.gmail.devu.study.mediabrowserservice.ui.MediaPlaybackFragment"

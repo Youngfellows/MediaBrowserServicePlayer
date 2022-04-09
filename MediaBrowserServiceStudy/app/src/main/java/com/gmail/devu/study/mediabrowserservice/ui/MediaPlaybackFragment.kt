@@ -25,8 +25,14 @@ import kotlinx.android.synthetic.main.fragment_media_playback.view.*
  * https://github.com/google/ExoPlayer/blob/release-v2/library/ui/src/main/res/layout/exo_playback_control_view.xml
  */
 class MediaPlaybackFragment : Fragment() {
-    private val TAG = this::class.java.simpleName
 
+    companion object {
+        private val TAG = MediaPlaybackFragment::class.java.simpleName
+    }
+
+    /**
+     * 携带数据的媒体播放控制页ViewModel
+     */
     private lateinit var viewModel: MediaPlaybackFragmentViewModel
 
     /**
@@ -46,6 +52,8 @@ class MediaPlaybackFragment : Fragment() {
 
         // Get a ViewModel
         val context = requireActivity()
+
+        //通过工厂为ViewModel传递参数数据
         val factory = MediaPlaybackFragmentViewModel.Factory(
             context.applicationContext as Application,
             MediaPlaybackServiceClient.getInstance(context)

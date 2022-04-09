@@ -14,11 +14,19 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.upstream.DataSource
 
+/**
+ * 播放状态回调
+ * @property exoPlayer 播放器
+ * @property dataSourceFactory 数据工厂
+ */
 class MediaPlaybackPreparer(
     private val exoPlayer: ExoPlayer,
     private val dataSourceFactory: DataSource.Factory
 ) : MediaSessionConnector.PlaybackPreparer {
-    private val TAG = this::class.java.simpleName
+
+    companion object {
+        private val TAG = MediaPlaybackPreparer::class.java.simpleName
+    }
 
     override fun getSupportedPrepareActions(): Long =
         PlaybackStateCompat.ACTION_PREPARE_FROM_MEDIA_ID or
@@ -30,13 +38,23 @@ class MediaPlaybackPreparer(
         Log.v(TAG, "onPrepare()")
     }
 
+    /**
+     * 更加媒体ID准备播放数据
+     * @param mediaId 播放资源ID
+     * @param playWhenReady
+     * @param extras
+     */
     override fun onPrepareFromMediaId(mediaId: String, playWhenReady: Boolean, extras: Bundle) {
         Log.v(TAG, "onPrepareFromMediaId(%s, %b)".format(mediaId, playWhenReady))
 
+        //播放列表
         val metadataList: List<MediaMetadataCompat> = DummyMedia.ITEMS
+        //准备播放数据
         val mediaSource = metadataList.toMediaSource(dataSourceFactory)
+        //播放位置
         val initialWindowIndex = metadataList.indexOfFirst { it.id == mediaId }
 
+        //准备播放
         exoPlayer.prepare(mediaSource)
         exoPlayer.seekTo(initialWindowIndex, 0)
         exoPlayer.setPlayWhenReady(playWhenReady)
